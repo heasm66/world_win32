@@ -1,0 +1,11 @@
+World is a text adventure game, like Adventure or Dungeon with a sci-fi
+twist. It is supposedly quite portable. To create it, you must compile,
+link, and run "vtxtcn.c" , then compile, link and run vcnvrt.c. Then
+compile the other seven .c files and link them to make the World executable.
+This program and q1text.dat are required to play the game.
+
+A .bat file is provided - it is just "pseudocode".
+
+Enjoy. Or be stumped. Or cheat.
+
+Doug McDonald (mcdonald@aries.scs.uiuc.edu)
