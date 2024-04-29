@@ -17,7 +17,7 @@ Instructions on how to build World for Windows. Project also contains already ge
 4. Add all inc-files generated above (9 files) to project.
 5. Add `_CRT_SECURE_NO_WARNINGS` to preprocessing.
 6. Change function `vsuspe` in `helper.c` with the following (see full code below):
-	* Set `buffer_size` to 200 instead of 256 because 256 makes `iret` return wrong number of items.
+	* Change `open/read/write/close` to `fopen/fread/fwrite/fclose`.
 	* Change last `OBJMAX` to `MOVMAX` instead to remove warning about obloc overrun.
 7. Compile for x86 release.
 8. To run: copy files `world.exe` and `q1text.dat` to your destination.
@@ -34,10 +34,19 @@ World C is free for non-commercial purposes.
 
 ### Modified `vsuspe`
 ```
+/*  Changed open/read/write/close to the more 
+    robust fopen/fread/fwrite/fclose. On Windows
+    the former is easily interrupted by signals
+    and don't read back the whole buffer.
+    Also the array obloc is only iterated with
+    MOVMAX, instead of OBJMAX, to not overrun
+    the array when reading back.
+                                       /HÅS      */
+
 vsuspe(inout)
     int             inout;
 {
-    short            sbuffer[256];
+    short           sbuffer[256];
     int             result, filedes, i, iret;
     short           *sbptr, *iptr;
     result = 0;
@@ -45,7 +54,7 @@ vsuspe(inout)
     if (inout != 1) {
     /* "suspend" or "save"  */
 
-    filedes = creat(filenm, 0600);
+    filedes = fopen(filenm, "wb");
     if (filedes == -1) {
         linout("I failed to create your save file.", 34);
         return (result);
@@ -95,33 +104,33 @@ vsuspe(inout)
     *sbptr++ = dcombi;
     *sbptr++ = chaset;
     *sbptr++ = guardl;
-        *sbptr++ = fimage;
-    write(filedes, sbuffer, 64*sizeof(short));
+    *sbptr++ = fimage;
+    fwrite(sbuffer, sizeof(short), 64, filedes);
     sbptr = sbuffer;
     iptr = locdat;
     for (i = 0; i <= LOCNUM; i++)
         *sbptr++ = *iptr++;
-    write(filedes, sbuffer, 200*sizeof(short));
+    fwrite(sbuffer, sizeof(short), 256, filedes);
     sbptr = sbuffer;
     iptr = obimpr;
     for (i = 0; i <= OBJMAX; i++)
         *sbptr++ = *iptr++;
-    write(filedes, sbuffer, 200*sizeof(short));
+    fwrite(sbuffer, sizeof(short), 256, filedes);
     sbptr = sbuffer;
     iptr = obloc;
-    for (i = 0; i <= OBJMAX; i++)
+    for (i = 0; i <= MOVMAX; i++)
         *sbptr++ = *iptr++;
-    write(filedes, sbuffer, 200*sizeof(short));
-    close(filedes);
+    fwrite(sbuffer, sizeof(short), 256, filedes);
+    fclose(filedes);
     return (result);
     } else {
     /* "restore"    */
 
-    filedes = open(filenm, 0);
+    filedes = fopen(filenm, "rb");
     if (filedes == -1)
         goto lab1;
-    iret = read(filedes, sbuffer, 64*sizeof(short));
-    if (iret != 64*sizeof(short))
+    iret = fread(sbuffer, sizeof(short),64,filedes);
+    if (iret != 64)
         goto lab1;
     sbptr = sbuffer;
     horflg = *sbptr++;
@@ -169,28 +178,28 @@ vsuspe(inout)
     chaset = *sbptr++;
     guardl = *sbptr++;
     fimage = *sbptr++;
-    iret = read(filedes, sbuffer, 200*sizeof(short));
-    if (iret != 200*sizeof(short))
+    iret = fread(sbuffer, sizeof(short), 256, filedes);
+    if (iret != 256)
         goto lab1;
     sbptr = sbuffer;
     iptr = locdat;
     for (i = 0; i <= LOCNUM; i++)
         *iptr++ = *sbptr++;
-    iret = read(filedes, sbuffer, 200*sizeof(short));
-    if (iret != 200*sizeof(short))
+    iret = fread(sbuffer, sizeof(short), 256, filedes);
+    if (iret != 256)
         goto lab1;
     sbptr = sbuffer;
     iptr = obimpr;
     for (i = 0; i <= OBJMAX; i++)
         *iptr++ = *sbptr++;
-    iret = read(filedes, sbuffer, 200*sizeof(short));
-    if (iret != 200*sizeof(short))
+    iret = fread(sbuffer, sizeof(short), 256, filedes);
+    if (iret != 256)
         goto lab1;
     sbptr = sbuffer;
     iptr = obloc;
     for (i = 0; i <= MOVMAX; i++)
         *iptr++ = *sbptr++;
-        close(filedes);
+    fclose(filedes);
     result = 1;
     chaser = 0;
     linout(" ", 1);
