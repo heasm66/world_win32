@@ -1,4 +1,13 @@
 # World, version 1.07 for Windows
+## About World
+*J.D.McDonald*:  
+«This is the portable "C" version of my text adventure game *WORLD*. It is a large game in the flavor of Adventure or Zork, and about as large. It is, however, a "sci-fi" type game somewhat like the commercial Infocom games *Planetfall* or *Starcross*, but much larger.»  
+    
+*IFDB*:  
+«On a scientific mission, your starship found that its long-range scanners could not penetrate the atmosphere of an unknown planet due to a shimmering forcefield. A landing party was sent down to investigate, Unfortunately, the dropship crashed. While the engineers are working to get the ship operational again, you are sent out to explore the surface and search for helpful resources and to investigate this mysterious World. From a rocky ridge, you find a huge valley with different terraformed geographical zones, each with its own vegetation and, perhaps, other life-forms?
+  
+Time to go exploring!»
+## Building  
 Instructions on how to build World for Windows. Project also contains already generated data files and binaries.
 ### Build with CygWin
 1. Generate data files:  
